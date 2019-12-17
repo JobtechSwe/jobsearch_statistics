@@ -29,6 +29,15 @@ def adcount_taxonomy_group(field_concept_id: str):
     return views
 
 
+@router.get("/adcount/occupation-name",
+            response_model=List[AdCountBucket], tags=['stats'])
+def adcount_taxonomy_occupation(group_concept_id: str):
+    views = elastic.taxonomy_code_count("occupation.concept_id.keyword",
+                                        ["occupation_group.concept_id.keyword"],
+                                        group_concept_id)
+    return views
+
+
 @router.get("/adcount/municipality",
             response_model=List[AdCountBucket], tags=['stats'])
 def adcount_municipality(region_code: str):
