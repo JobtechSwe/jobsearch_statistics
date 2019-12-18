@@ -77,21 +77,30 @@ def adcount_municipality(
         region_code: str, limit: int = 49,
         filter_by: str = Query(None, name="filter", title="Concept ID filter",
                                description="Filter results by concept ID for occupation, group or field")):
-    views = elastic.taxonomy_code_count("workplace_address.municipality_concept_id",
-                                        ["workplace_address.region_code",
-                                         "workplace_address.region_concept_id"],
-                                        region_code, filter_by,
-                                        [
-                                            "workplace_address.region_code",
-                                            "workplace_address.region_concept_id",
-                                            "workplace_address.municipality_code",
-                                            "workplace_address.municipality_concept_id"
-                                        ], limit)
+    views = elastic.taxonomy_code_count(concept_type="workplace_address.municipality_concept_id",
+                                        parent_fields=["workplace_address.region_code",
+                                                       "workplace_address.region_concept_id"],
+                                        parent_concept_id=region_code, filter_by=filter_by,
+                                        filter_fields=[
+                                            "occupation.concept_id.keyword",
+                                            "occupation_group.concept_id.keyword",
+                                            "occupation_field.concept_id.keyword"
+                                        ], n=limit)
     return views
 
 
 @router.get("/adcount/region",
             response_model=List[AdCountBucket], tags=['stats'])
-def adcount_region(limit: int = 21):
-    views = elastic.taxonomy_code_count("workplace_address.region_concept_id", n=limit)
+def adcount_region(
+        limit: int = 21,
+        filter_by: str = Query(None, name="filter", title="Concept ID filter",
+                               description="Filter results by concept ID for occupation, group or field")):
+
+    views = elastic.taxonomy_code_count(concept_type="workplace_address.region_concept_id",
+                                        filter_by=filter_by,
+                                        filter_fields=[
+                                            "occupation.concept_id.keyword",
+                                            "occupation-group.concept_id.keyword",
+                                            "occupation-field.concept_id.keyword"
+                                        ], n=limit)
     return views
