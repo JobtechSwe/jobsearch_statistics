@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from typing import List
 
@@ -15,41 +15,83 @@ class AdCountBucket(BaseModel):
 
 @router.get("/adcount/occupation-field",
             response_model=List[AdCountBucket], tags=['stats'])
-def adcount_taxonomy_field():
-    views = elastic.taxonomy_code_count("occupation_field.concept_id.keyword")
+def adcount_taxonomy_field(
+        limit: int = 21,
+        filter_by: str = Query(
+            None, name="filter", title="Concept ID filter",
+            description="Filter results by concept ID for region or municipality")):
+    views = elastic.taxonomy_code_count(concept_type="occupation_field.concept_id.keyword",
+                                        filter_by=filter_by,
+                                        filter_fields=[
+                                            "workplace_address.region_code",
+                                            "workplace_address.region_concept_id",
+                                            "workplace_address.municipality_code",
+                                            "workplace_address.municipality_concept_id"
+                                        ],
+                                        n=limit)
     return views
 
 
 @router.get("/adcount/occupation-group",
             response_model=List[AdCountBucket], tags=['stats'])
-def adcount_taxonomy_group(field_concept_id: str):
-    views = elastic.taxonomy_code_count("occupation_group.concept_id.keyword",
-                                        ["occupation_field.concept_id.keyword"],
-                                        field_concept_id)
+def adcount_taxonomy_group(
+        field_concept_id: str,
+        limit: int = 50,
+        filter_by: str = Query(
+            None, name="filter", title="Concept ID filter",
+            description="Filter results by concept ID for region or municipality")):
+    views = elastic.taxonomy_code_count(concept_type="occupation_group.concept_id.keyword",
+                                        parent_fields=["occupation_field.concept_id.keyword"],
+                                        parent_concept_id=field_concept_id,
+                                        filter_fields=[
+                                            "workplace_address.region_code",
+                                            "workplace_address.region_concept_id",
+                                            "workplace_address.municipality_code",
+                                            "workplace_address.municipality_concept_id"
+                                        ], filter_by=filter_by, n=limit)
     return views
 
 
 @router.get("/adcount/occupation-name",
             response_model=List[AdCountBucket], tags=['stats'])
-def adcount_taxonomy_occupation(group_concept_id: str):
-    views = elastic.taxonomy_code_count("occupation.concept_id.keyword",
-                                        ["occupation_group.concept_id.keyword"],
-                                        group_concept_id)
+def adcount_taxonomy_occupation(group_concept_id: str, limit: int = 50,
+                                filter_by: str = Query(
+                                    None, name="filter", title="Concept ID filter",
+                                    description="Filter results by concept ID for region or municipality")):
+    views = elastic.taxonomy_code_count(concept_type="occupation.concept_id.keyword",
+                                        parent_fields=["occupation_group.concept_id.keyword"],
+                                        parent_concept_id=group_concept_id,
+                                        filter_fields=[
+                                            "workplace_address.region_code",
+                                            "workplace_address.region_concept_id",
+                                            "workplace_address.municipality_code",
+                                            "workplace_address.municipality_concept_id"
+                                        ], filter_by=filter_by, n=limit)
     return views
 
 
 @router.get("/adcount/municipality",
             response_model=List[AdCountBucket], tags=['stats'])
-def adcount_municipality(region_code: str):
+# Default limit to maximum number of municipalities by region
+def adcount_municipality(
+        region_code: str, limit: int = 49,
+        filter_by: str = Query(None, name="filter", title="Concept ID filter",
+                               description="Filter results by concept ID for occupation, group or field")):
     views = elastic.taxonomy_code_count("workplace_address.municipality_concept_id",
                                         ["workplace_address.region_code",
                                          "workplace_address.region_concept_id"],
-                                        region_code)
+                                        region_code, filter_by,
+                                        [
+                                            "workplace_address.region_code",
+                                            "workplace_address.region_concept_id",
+                                            "workplace_address.municipality_code",
+                                            "workplace_address.municipality_concept_id"
+                                        ], limit)
     return views
 
 
 @router.get("/adcount/region",
             response_model=List[AdCountBucket], tags=['stats'])
-def adcount_region():
-    views = elastic.taxonomy_code_count("workplace_address.region_concept_id")
+def adcount_region(limit: int = 21):
+    views = elastic.taxonomy_code_count("workplace_address.region_concept_id", n=limit)
     return views

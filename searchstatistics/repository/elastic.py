@@ -71,7 +71,7 @@ def ad_freetext_terms(ad_id, from_date, to_date, n):
 
 
 def taxonomy_code_count(concept_type, parent_fields=None,
-                        parent_concept_id=None, n=10000):
+                        parent_concept_id=None, filter_fields=None, filter_by=None, n=10000):
     offset = _calculate_utc_offset()
     dsl = {
         'size': 0,
@@ -113,9 +113,21 @@ def taxonomy_code_count(concept_type, parent_fields=None,
         alternatives = []
         for parent_field in parent_fields:
             alternatives.append({'term': {parent_field: parent_concept_id}})
-        dsl['query']['bool']['must'] = {
+        dsl['query']['bool']['must'] = [{
             'bool': {'should': [alternatives]}
-        }
+        }]
+    if filter_by and filter_fields:
+        alternatives = []
+        for filter_field in filter_fields:
+            alternatives.append({'term': {filter_field: filter_by}})
+        if 'must' in dsl['query']['bool']:
+            dsl['query']['bool']['must'].extend([{'bool': {'should': [alternatives]}}])
+        else:
+            dsl['query']['bool']['must'] = {
+                'bool': {'should': [alternatives]}
+            }
+    #  print(json.dumps(dsl, indent=2))
+
     occurences = elastic.search(index=settings.ES_PLATSANNONS_INDEX, body=dsl)
     return [
         {
