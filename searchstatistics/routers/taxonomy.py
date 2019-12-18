@@ -15,7 +15,7 @@ class AdCountBucket(BaseModel):
 
 @router.get("/adcount/occupation-field",
             response_model=List[AdCountBucket], tags=['stats'])
-def adcount_taxonomy_field(
+def ad_count_taxonomy_field(
         limit: int = 21,
         filter_by: str = Query(
             None, name="filter", title="Concept ID filter",
@@ -34,7 +34,7 @@ def adcount_taxonomy_field(
 
 @router.get("/adcount/occupation-group",
             response_model=List[AdCountBucket], tags=['stats'])
-def adcount_taxonomy_group(
+def ad_count_taxonomy_group(
         field_concept_id: str,
         limit: int = 50,
         filter_by: str = Query(
@@ -54,8 +54,8 @@ def adcount_taxonomy_group(
 
 @router.get("/adcount/occupation-name",
             response_model=List[AdCountBucket], tags=['stats'])
-def adcount_taxonomy_occupation(group_concept_id: str, limit: int = 50,
-                                filter_by: str = Query(
+def ad_count_taxonomy_occupation(group_concept_id: str, limit: int = 50,
+                                 filter_by: str = Query(
                                     None, name="filter", title="Concept ID filter",
                                     description="Filter results by concept ID for region or municipality")):
     views = elastic.taxonomy_code_count(concept_type="occupation.concept_id.keyword",
@@ -73,7 +73,7 @@ def adcount_taxonomy_occupation(group_concept_id: str, limit: int = 50,
 @router.get("/adcount/municipality",
             response_model=List[AdCountBucket], tags=['stats'])
 # Default limit to maximum number of municipalities by region
-def adcount_municipality(
+def ad_count_municipality(
         region_code: str, limit: int = 49,
         filter_by: str = Query(None, name="filter", title="Concept ID filter",
                                description="Filter results by concept ID for occupation, group or field")):
@@ -91,7 +91,7 @@ def adcount_municipality(
 
 @router.get("/adcount/region",
             response_model=List[AdCountBucket], tags=['stats'])
-def adcount_region(
+def ad_count_region(
         limit: int = 21,
         filter_by: str = Query(None, name="filter", title="Concept ID filter",
                                description="Filter results by concept ID for occupation, group or field")):
