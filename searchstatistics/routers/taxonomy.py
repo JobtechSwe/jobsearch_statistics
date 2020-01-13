@@ -27,8 +27,7 @@ def ad_count_taxonomy_field(
                                             "workplace_address.region_concept_id",
                                             "workplace_address.municipality_code",
                                             "workplace_address.municipality_concept_id"
-                                        ],
-                                        n=limit)
+                                        ], n=limit)
     return views
 
 
