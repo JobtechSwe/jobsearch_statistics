@@ -99,7 +99,7 @@ def ad_count_region(
                                         filter_by=filter_by,
                                         filter_fields=[
                                             "occupation.concept_id.keyword",
-                                            "occupation-group.concept_id.keyword",
-                                            "occupation-field.concept_id.keyword"
+                                            "occupation_group.concept_id.keyword",
+                                            "occupation_field.concept_id.keyword"
                                         ], n=limit)
     return views
